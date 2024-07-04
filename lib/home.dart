@@ -8,7 +8,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      appBar: const Header(),
+      appBar: Header(),
       body: Center(
         child: Text('메인 페이지 콘텐츠'),
       ),

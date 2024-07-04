@@ -6,42 +6,41 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: const Text('등대'),
+      title: GestureDetector(
+        onTap: () {
+          Navigator.pushReplacementNamed(context, '/');
+        },
+        child: Text('등대'),
+      ),
       actions: <Widget>[
         IconButton(
-          icon: const Icon(Icons.home),
+          icon: Icon(Icons.info),
           onPressed: () {
-            Navigator.pushNamed(context, '/');
+            Navigator.pushReplacementNamed(context, '/introduction');
           },
         ),
         IconButton(
-          icon: const Icon(Icons.info),
+          icon: Icon(Icons.calendar_today),
           onPressed: () {
-            Navigator.pushNamed(context, '/introduction');
+            Navigator.pushReplacementNamed(context, '/calendar');
           },
         ),
         IconButton(
-          icon: const Icon(Icons.calendar_today),
+          icon: Icon(Icons.notifications),
           onPressed: () {
-            Navigator.pushNamed(context, '/calendar');
+            Navigator.pushReplacementNamed(context, '/notice');
           },
         ),
         IconButton(
-          icon: const Icon(Icons.notifications),
+          icon: Icon(Icons.forum),
           onPressed: () {
-            Navigator.pushNamed(context, '/notice');
+            Navigator.pushReplacementNamed(context, '/free');
           },
         ),
         IconButton(
-          icon: const Icon(Icons.forum),
+          icon: Icon(Icons.contact_mail),
           onPressed: () {
-            Navigator.pushNamed(context, '/free');
-          },
-        ),
-        IconButton(
-          icon: const Icon(Icons.contact_mail),
-          onPressed: () {
-            Navigator.pushNamed(context, '/inquiry');
+            Navigator.pushReplacementNamed(context, '/inquiry');
           },
         ),
       ],
@@ -49,5 +48,5 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => Size.fromHeight(kToolbarHeight);
 }
