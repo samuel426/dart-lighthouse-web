@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'header.dart';
-import 'footer.dart';
+import '../header.dart';
+import '../footer.dart';
 
 class IntroductionPage extends StatelessWidget {
   const IntroductionPage({super.key});

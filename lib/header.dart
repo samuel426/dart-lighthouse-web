@@ -1,22 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'auth_provider.dart';
 
 class Header extends StatelessWidget implements PreferredSizeWidget {
   const Header({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final auth = Provider.of<AuthProvider>(context);
+
     return Column(
       children: [
         AppBar(
-          backgroundColor: Colors.white, // 배경색을 하얀색으로 설정
+          backgroundColor: Colors.white,
           title: GestureDetector(
             onTap: () {
               context.go('/');
             },
             child: const Text(
               '등대',
-              style: TextStyle(color: Colors.black), // 텍스트 색상 변경
+              style: TextStyle(color: Colors.black),
             ),
           ),
           actions: <Widget>[
@@ -52,16 +56,34 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
               },
               child: const Text('문의사항', style: TextStyle(color: Colors.black)),
             ),
-            TextButton(
-              onPressed: () {
-                context.go('/login');
-              },
-              child:
-                  const Text('로그인/회원가입', style: TextStyle(color: Colors.black)),
-            ),
+            if (auth.loggedIn) ...[
+              TextButton(
+                onPressed: () {
+                  context.go('/user');
+                },
+                child:
+                    const Text('사용자 정보', style: TextStyle(color: Colors.black)),
+              ),
+              TextButton(
+                onPressed: () {
+                  auth.logout();
+                  context.go('/login');
+                },
+                child:
+                    const Text('로그아웃', style: TextStyle(color: Colors.black)),
+              ),
+            ] else ...[
+              TextButton(
+                onPressed: () {
+                  context.go('/login');
+                },
+                child: const Text('로그인/회원가입',
+                    style: TextStyle(color: Colors.black)),
+              ),
+            ],
           ],
         ),
-        const Divider(height: 1, color: Colors.black), // 구분선 추가
+        const Divider(height: 1, color: Colors.black),
       ],
     );
   }

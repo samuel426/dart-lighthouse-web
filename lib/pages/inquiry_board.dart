@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'header.dart';
-import 'footer.dart';
+import '../header.dart';
+import '../footer.dart';
 
 class InquiryBoardPage extends StatelessWidget {
   const InquiryBoardPage({super.key});

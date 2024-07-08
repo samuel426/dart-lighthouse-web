@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'header.dart';
-import 'footer.dart';
+import '../header.dart';
+import '../footer.dart';
 
 class NoticeBoardPage extends StatelessWidget {
   const NoticeBoardPage({super.key});

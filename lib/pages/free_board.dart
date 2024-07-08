@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'header.dart';
-import 'footer.dart';
+import '../header.dart';
+import '../footer.dart';
 
 class FreeBoardPage extends StatelessWidget {
   const FreeBoardPage({super.key});

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'header.dart';
-import 'footer.dart';
+import '../header.dart';
+import '../footer.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
@@ -102,7 +102,7 @@ class Event {
 
 // 데모 일정 데이터
 final Map<DateTime, List<Event>> kEvents = {
-  DateTime.utc(2023, 7, 7): [Event('봉사 활동 1'), Event('미팅 2')],
-  DateTime.utc(2023, 7, 13): [Event('봉사 활동 2')],
-  DateTime.utc(2023, 7, 20): [Event('미팅 1')],
+  DateTime.utc(2024, 7, 7): [Event('봉사 활동 1'), Event('미팅 2')],
+  DateTime.utc(2024, 7, 13): [Event('봉사 활동 2')],
+  DateTime.utc(2024, 7, 20): [Event('미팅 1')],
 };
