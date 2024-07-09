@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hive/hive.dart';
 import '../header.dart';
 import '../footer.dart';
 import '../auth_provider.dart';
@@ -24,6 +21,7 @@ class _SignupPageState extends State<SignupPage> {
       TextEditingController();
   final TextEditingController _joinYearController = TextEditingController();
   String _errorMessage = '';
+  String _memberType = 'YB'; // 기본값을 YB로 설정
 
   Future<void> _signup() async {
     final String email = _emailController.text;
@@ -39,49 +37,25 @@ class _SignupPageState extends State<SignupPage> {
       return;
     }
 
-    // 기수 계산
     final int generation = joinYear - 1979 + 1;
 
+    final user = User(
+      email: email,
+      name: name,
+      password: password,
+      joinYear: joinYear,
+      memberType: _memberType, // YB/OB 정보 추가
+    );
+
     try {
-      final response = await http.post(
-        Uri.parse('http://localhost:8080/api/signup'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, String>{
-          'email': email,
-          'name': name,
-          'password': password,
-          'joinYear': joinYear.toString(),
-          'generation': generation.toString(),
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final box = Hive.box<User>('users');
-        final user = User(
-          email: email,
-          name: name,
-          password: password,
-          joinYear: joinYear,
-        );
-        await box.put(email, user); // 사용자 정보를 Hive에 저장
-
-        final Map<String, dynamic> data = jsonDecode(response.body);
-        final String token = data['token'];
-        Provider.of<AuthProvider>(context, listen: false).login(email, token);
-        context.go('/'); // Go to home page
-      } else {
-        setState(() {
-          _errorMessage = '회원가입 실패: ${response.body}';
-        });
-        print('Signup failed, response: ${response.body}');
-      }
+      await Provider.of<AuthProvider>(context, listen: false)
+          .registerUser(user);
+      context.go('/login'); // Go to login page
     } catch (e) {
-      print('Error during signup: $e');
       setState(() {
-        _errorMessage = '회원가입 중 오류가 발생했습니다.';
+        _errorMessage = e.toString();
       });
+      print('Error during signup: $e');
     }
   }
 
@@ -146,6 +120,32 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                   keyboardType: TextInputType.number,
                 ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Radio<String>(
+                    value: 'YB',
+                    groupValue: _memberType,
+                    onChanged: (value) {
+                      setState(() {
+                        _memberType = value!;
+                      });
+                    },
+                  ),
+                  const Text('YB'),
+                  Radio<String>(
+                    value: 'OB',
+                    groupValue: _memberType,
+                    onChanged: (value) {
+                      setState(() {
+                        _memberType = value!;
+                      });
+                    },
+                  ),
+                  const Text('OB'),
+                ],
               ),
               const SizedBox(height: 20),
               SizedBox(

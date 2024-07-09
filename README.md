@@ -1,16 +1,7 @@
-# my_app
+# 풀스택 프로그래밍 프로젝트
 
-A new Flutter project.
+동아리 홈페이지 사이트 제작
 
-## Getting Started
+## 시작하기 앞서
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+해당 프로젝트는 **dart flutter**로 제작되었습니다.

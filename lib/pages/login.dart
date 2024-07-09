@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../header.dart';
 import '../footer.dart';
 import '../auth_provider.dart';
@@ -18,38 +16,29 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   String _errorMessage = '';
+  bool _isLoading = false; // 중복 요청 방지
 
   Future<void> _login() async {
+    setState(() {
+      _isLoading = true; // 로그인 요청 시작
+      _errorMessage = ''; // 기존 오류 메시지 초기화
+    });
+
     try {
       final String email = _emailController.text;
       final String password = _passwordController.text;
 
-      final response = await http.post(
-        Uri.parse('http://localhost:8080/api/login'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, String>{
-          'email': email,
-          'password': password,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = jsonDecode(response.body);
-        final String token = data['token'];
-        Provider.of<AuthProvider>(context, listen: false).login(email, token);
-        context.go('/'); // Go to home page
-      } else {
-        setState(() {
-          _errorMessage = '로그인 실패: ${response.body}';
-        });
-        print('Login failed, response: ${response.body}');
-      }
+      await Provider.of<AuthProvider>(context, listen: false)
+          .login(email, password);
+      context.go('/'); // 로그인 성공 시 홈 페이지로 이동
     } catch (e) {
-      print('Error during login: $e');
       setState(() {
-        _errorMessage = '로그인 중 오류가 발생했습니다.';
+        _errorMessage = e.toString(); // 오류 메시지 설정
+      });
+      print('Error during login: $e');
+    } finally {
+      setState(() {
+        _isLoading = false; // 로그인 요청 종료
       });
     }
   }
@@ -85,27 +74,28 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              SizedBox(
-                width: 150,
-                child: ElevatedButton(
-                  onPressed: _login,
-                  child: const Text('로그인'),
+              if (_isLoading)
+                const CircularProgressIndicator() // 로딩 표시 추가
+              else
+                SizedBox(
+                  width: 150,
+                  child: ElevatedButton(
+                    onPressed: _login,
+                    child: const Text('로그인'),
+                  ),
                 ),
-              ),
               const SizedBox(height: 20),
+              if (_errorMessage.isNotEmpty)
+                Text(
+                  _errorMessage,
+                  style: const TextStyle(color: Colors.red),
+                ),
               TextButton(
                 onPressed: () {
                   context.go('/signup');
                 },
                 child: const Text('회원가입'),
               ),
-              if (_errorMessage.isNotEmpty) ...[
-                const SizedBox(height: 20),
-                Text(
-                  _errorMessage,
-                  style: const TextStyle(color: Colors.red),
-                ),
-              ],
             ],
           ),
         ),

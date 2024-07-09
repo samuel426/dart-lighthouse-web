@@ -19,8 +19,8 @@ class Footer extends StatelessWidget {
                 children: [
                   Image.asset(
                     'assets/icon1_cropped.png', // Add your image to the assets folder and provide the correct path
-                    height: 100,
-                    width: 100,
+                    height: 120,
+                    width: 120,
                   ),
                 ],
               ),
