@@ -1,0 +1,3 @@
+[submodule "my_app"]
+	path = my_app
+	url = https://github.com/samuel426/dart-lighthouse-web.git
