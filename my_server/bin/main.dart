@@ -1,103 +1,113 @@
-import 'package:alfred/alfred.dart';
 import 'dart:convert';
 import 'dart:io';
+import 'package:alfred/alfred.dart';
 
 void main() async {
   final app = Alfred();
 
-  // 사용자 데이터 파일 경로 설정
-  final String userFilePath = 'bin/user.json';
-
-  // CORS 설정 추가
-  app.all('*', (req, res) async {
+  app.all('/*', (req, res) async {
     res.headers.add('Access-Control-Allow-Origin', '*');
     res.headers
-        .add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
-    res.headers.add(
-        'Access-Control-Allow-Headers', 'Origin, Content-Type, X-Auth-Token');
+        .add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.headers
+        .add('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     if (req.method == 'OPTIONS') {
-      res.statusCode = 200;
+      res.statusCode = HttpStatus.noContent;
       await res.close();
+      return;
     }
-  });
-
-  app.get('/', (req, res) {
-    return {'message': 'Hello, World!'};
   });
 
   app.post('/api/login', (req, res) async {
     try {
-      final body = await req.bodyAsJsonMap;
+      final bodyString = await utf8.decoder.bind(req).join();
+      final body = jsonDecode(bodyString) as Map<String, dynamic>;
       final email = body['email'];
       final password = body['password'];
 
-      final File file = File(userFilePath);
-      if (await file.exists()) {
-        final contents = await file.readAsString();
-        final users = jsonDecode(contents) as List<dynamic>;
-        final user = users.firstWhere(
-          (user) => user['email'] == email && user['password'] == password,
-          orElse: () => null,
-        );
+      final users = await getUsersFromJson();
 
-        if (user != null) {
-          print('Login successful for $email');
-          res.json({'token': 'your_jwt_token_here'});
-        } else {
-          res.statusCode = 401;
-          print('Login failed for $email');
-          res.json({'error': 'Invalid credentials'});
-        }
+      final user = users.firstWhere(
+        (user) => user['email'] == email && user['password'] == password,
+        orElse: () => {},
+      );
+
+      if (user != null && user.isNotEmpty) {
+        res.json({'token': 'your_jwt_token_here', 'user': user});
       } else {
-        res.statusCode = 401;
-        print('User file not found for $email');
-        res.json({'error': 'Invalid credentials'});
+        res.statusCode = HttpStatus.unauthorized;
+        res.json({'status': 'error', 'message': 'Invalid credentials'});
       }
     } catch (e) {
-      print('Error during login: $e');
-      res.statusCode = 500;
-      res.json({'error': 'Login failed', 'details': e.toString()});
+      res.statusCode = HttpStatus.internalServerError;
+      res.json({'status': 'error', 'message': 'Server error'});
     }
   });
 
   app.post('/api/signup', (req, res) async {
     try {
-      final body = await req.bodyAsJsonMap;
+      final bodyString = await utf8.decoder.bind(req).join();
+      final body = jsonDecode(bodyString) as Map<String, dynamic>;
       final email = body['email'];
       final name = body['name'];
       final password = body['password'];
-      final int joinYear = int.parse(body['joinYear']);
-      final String memberType = body['memberType'];
-      final int generation = joinYear - 1979 + 1;
+      final joinYear = body['joinYear'];
+      final memberType = body['memberType'];
+      final generation = DateTime.now().year - 1978;
 
-      final File file = File(userFilePath);
-      List<dynamic> users = [];
-
-      if (await file.exists()) {
-        final contents = await file.readAsString();
-        users = jsonDecode(contents) as List<dynamic>;
-      }
-
+      final users = await getUsersFromJson();
       users.add({
         'email': email,
         'name': name,
         'password': password,
         'joinYear': joinYear,
         'generation': generation,
-        'memberType': memberType,
+        'memberType': memberType
       });
 
-      await file.writeAsString(jsonEncode(users));
+      await saveUsersToJson(users);
 
-      print('Signup successful for $email');
-      res.json({'token': 'your_jwt_token_here'});
+      res.json(
+          {'status': 'success', 'message': 'User registered successfully'});
     } catch (e) {
-      print('Error during signup: $e');
-      res.statusCode = 500;
-      res.json({'error': 'Signup failed', 'details': e.toString()});
+      res.statusCode = HttpStatus.internalServerError;
+      res.json({'status': 'error', 'message': 'Server error'});
+    }
+  });
+
+  app.get('/api/user_info', (req, res) async {
+    final token = req.headers.value('Authorization')?.split(' ').last;
+
+    if (token == 'your_jwt_token_here') {
+      // 실제 사용자 정보를 반환합니다.
+      final user = {
+        'email': 'example@example.com',
+        'name': '사용자 이름',
+        'joinYear': 2020,
+        'generation': 42,
+        'memberType': 'YB',
+      };
+      res.json(user);
+    } else {
+      res.statusCode = 401;
+      res.json({'error': 'Unauthorized'});
     }
   });
 
   await app.listen(8080);
   print('Server listening on port 8080');
+}
+
+Future<List<Map<String, dynamic>>> getUsersFromJson() async {
+  final file = File('bin/user.json');
+  if (await file.exists()) {
+    final content = await file.readAsString();
+    return List<Map<String, dynamic>>.from(jsonDecode(content));
+  }
+  return [];
+}
+
+Future<void> saveUsersToJson(List<Map<String, dynamic>> users) async {
+  final file = File('bin/user.json');
+  await file.writeAsString(jsonEncode(users));
 }
